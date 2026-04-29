@@ -1,0 +1,201 @@
+---
+title: 11 · GitHub와 함께 쓰기
+description: 코드 변경을 안전하게 관리하기. git 초보자도 가능한 패턴 모음.
+---
+
+# 11 · GitHub와 함께 쓰기
+
+> "AI가 내 코드 망쳐버리면 어떡하지?" — 그래서 git이 있어요.
+
+이 페이지는 **git과 GitHub를 처음 쓰는 분**도 따라올 수 있게 썼습니다.
+
+## 왜 git이 필요해요?
+
+> **git = 시간 여행. 언제든 이전 상태로 되돌릴 수 있는 안전망.**
+
+Claude가 큰 변경을 했는데 마음에 안 들면? git이 있으면 **한 줄로 원상 복구.**
+
+| 상황 | git 없을 때 | git 있을 때 |
+|---|---|---|
+| AI가 코드 망쳐놨다 | 손으로 다시 짜기 😭 | `git restore .` 끝 |
+| 어제 짠 버전이 더 좋았는데 | 백업 폴더 뒤지기 | 한 줄로 그 시점으로 |
+| 다른 사람과 같이 작업 | 폴더 드라이브 공유? | GitHub 통해 매끄럽게 |
+
+## 시작하기
+
+### git 설치 확인
+
+```bash
+git --version
+```
+
+설치 안 됐으면:
+- macOS: `brew install git` 또는 Xcode Command Line Tools
+- Windows: [git-scm.com](https://git-scm.com) 다운로드
+- Linux: `sudo apt install git`
+
+### 사용자 정보 등록 (한 번만)
+
+```bash
+git config --global user.name "본인 이름"
+git config --global user.email "본인이메일@example.com"
+```
+
+### GitHub 계정 + CLI
+
+[github.com](https://github.com) 가입 후, GitHub CLI 설치 추천:
+
+```bash
+# macOS
+brew install gh
+
+# Windows
+winget install GitHub.cli
+```
+
+그 다음 로그인:
+
+```bash
+gh auth login
+```
+
+## Claude와 git 같이 쓰는 패턴
+
+### 패턴 1 · 작업 전 커밋 (가장 중요!)
+
+```bash
+git status   # 변경사항 확인
+git add .    # 전체 추가
+git commit -m "AI 작업 전 안전 백업"
+```
+
+이러고 나서 Claude에게 부탁. **Claude가 망쳐도 이전 커밋으로 복구 가능.**
+
+### 패턴 2 · Claude에게 git까지 시키기
+
+```
+> 이 페이지에 다크모드 추가해줘.
+   작업 전후로 git commit 해줘.
+   커밋 메시지는 "feat: dark mode" 처럼 영어 컨벤션으로.
+```
+
+Claude가 알아서:
+1. 작업 전 백업 커밋
+2. 코드 변경
+3. 변경사항 커밋
+
+### 패턴 3 · GitHub PR 자동 만들기
+
+```
+> 지금 변경사항으로 새 브랜치 만들고 PR 올려줘.
+   PR 제목은 "다크모드 지원", 본문엔 변경 내역 정리.
+```
+
+Claude는 `gh pr create` 도구로 GitHub에 PR을 직접 만들어줘요.
+
+## 자주 쓰는 git 명령어 (Top 7)
+
+| 명령어 | 무엇을 하나요? |
+|---|---|
+| `git status` | 지금 뭐가 바뀌었나? |
+| `git add .` | 변경사항을 "스테이징" |
+| `git commit -m "메시지"` | 스냅샷 저장 |
+| `git log --oneline` | 지금까지의 커밋 기록 |
+| `git restore <파일>` | 변경 취소 (작업디렉토리) |
+| `git push` | 원격(GitHub)에 올림 |
+| `git pull` | 원격에서 내려받음 |
+
+> 💡 다 외우려 하지 마세요. Claude에게 "지금 변경사항 commit하고 push 해줘" 라고 말하면 됩니다.
+
+## GitHub에 첫 레포지토리 올리기
+
+가장 쉬운 방법은 **Claude에게 통째로 시키는 것.**
+
+```
+> 이 폴더를 GitHub에 새 레포지토리로 올려줘.
+   레포 이름: my-first-claude-project
+   비공개로 해줘.
+   처음 커밋 메시지: "initial commit"
+```
+
+Claude는 알아서:
+1. `git init`
+2. `.gitignore` 만들기
+3. 커밋
+4. `gh repo create` 로 GitHub에 레포 만들기
+5. 푸시
+
+## 안전 규칙
+
+### ✅ 꼭 하세요
+
+- 큰 작업 전엔 항상 `git commit` (백업)
+- `.gitignore` 에 `.env`, `node_modules`, 비밀번호 파일 등록
+- 처음 GitHub 올릴 땐 **Private**(비공개) 로 시작
+- main 브랜치엔 직접 푸시 말고 PR 거치기
+
+### ❌ 하지 마세요
+
+- 비밀번호/API 키를 코드에 직접 적기 (한 번 푸시되면 영원히 남음)
+- `git push --force` 함부로 — 다른 사람 작업 날릴 수 있음
+- 검증 안 된 자동 합치기 (`merge` / `rebase`) — 일단 commit 후 천천히
+
+## Claude에게 git 부탁할 때 주의점
+
+### 묻고 시키세요
+
+```
+> 다음 세 가지를 차례로 해줘. 각 단계 끝날 때마다 OK 받고 진행:
+   1. 변경사항 git add + commit
+   2. 새 브랜치 'feature/dark-mode' 만들기
+   3. GitHub PR 만들기
+```
+
+각 단계마다 권한 확인이 뜨니, **무엇을 한다는지 보고 Yes**.
+
+### 위험한 명령은 metadata로 막기
+
+`.claude/settings.json` 에:
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)"
+    ]
+  }
+}
+```
+
+이러면 실수로도 못 함.
+
+## 자주 묻는 질문
+
+<details>
+<summary><b>Q. 이미 GitHub에 푸시된 비밀번호를 지우려면?</b></summary>
+
+푸시 전에 막는 게 최선이에요. 이미 올라갔다면:
+1. 즉시 그 키/비밀번호 **무효화**(invalidate)
+2. `git filter-repo` 또는 BFG Repo-Cleaner로 히스토리에서 삭제
+3. 강제 푸시 (위험)
+
+복잡하니까 Claude에게 단계별로 도움 받으세요.
+</details>
+
+<details>
+<summary><b>Q. 한국어 커밋 메시지 써도 되나요?</b></summary>
+
+기술적으론 가능. 단, 협업 시 영어가 표준이라 한국어는 사이드 프로젝트에서만 추천.
+</details>
+
+<details>
+<summary><b>Q. main / master / dev 브랜치 차이?</b></summary>
+
+전통적으로 `master`가 메인 브랜치 이름이었는데 요즘은 `main`이 표준. `dev` 는 개발용 브랜치를 별도로 두는 컨벤션. 본인 프로젝트는 `main` 하나만 써도 충분.
+</details>
+
+## 다음 단계
+
+- 👉 [12 자주 하는 실수](/practice/common-mistakes) — git 관련 실수도 포함
+- 👉 [16 Hooks](/advanced/hooks) — 위험한 git 명령 자동 차단

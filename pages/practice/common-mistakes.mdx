@@ -1,0 +1,195 @@
+---
+title: 12 · 자주 하는 실수 대처법
+description: 첫 한 달에 한 번씩은 겪는 함정 모음. 미리 알고 가면 시간 절약.
+---
+
+# 12 · 자주 하는 실수 대처법
+
+> "어제 이거 똑같이 당했는데" — 신규 사용자의 80%가 겪는 케이스만 모았습니다.
+
+## 🚩 Top 10 실수
+
+### 1. 권한 묻는 거 다 Yes
+
+**상황**: 빨리 진행하려고 권한 확인을 다 Yes로 누름  
+**문제**: `rm -rf` 같은 위험한 명령도 그대로 통과  
+**해결**:
+- 무엇을 한다는지 1초만 읽기
+- 위험한 명령은 [Hooks로 미리 차단](/advanced/hooks)
+- `/permissions` 으로 default 모드 유지
+
+### 2. 큰 작업을 한 번에 시킴
+
+**상황**: "이 사이트 통째로 리팩토링하고 디자인 새로 하고 배포까지 해줘"  
+**문제**: 컨텍스트 꽉 참 → 결과 누락 / 품질 저하  
+**해결**: **단계별로 끊어 시키기**
+```
+1단계: 리팩토링 (코드 정리만)
+2단계: 디자인 변경 (UI만)
+3단계: 배포 설정
+```
+각 단계 끝나면 `/clear` 또는 새 세션.
+
+### 3. CLAUDE.md 안 만들고 매번 같은 설명
+
+**상황**: "한국어로 답해줘. 코드 컨벤션은 ESLint Airbnb." 매번 반복  
+**해결**: [CLAUDE.md에 한 번 적어두기](/core/claude-md)
+
+### 4. 컨텍스트 누적된 채로 며칠 사용
+
+**상황**: 어제 켠 Claude를 오늘도 그대로 사용 → 점점 멍청해짐  
+**해결**: 작업 단위로 `/clear` 또는 새 세션. ([10 세션 관리](/core/sessions))
+
+### 5. git 커밋 없이 큰 변경 시킴
+
+**상황**: AI가 100줄 수정함. 마음에 안 듦. 되돌리려는데 못 함.  
+**해결**: **작업 전 항상 `git commit`** ([11 GitHub와 함께 쓰기](/practice/github))
+
+### 6. .env / 비밀번호 파일 노출
+
+**상황**: API 키가 코드에 박힘 → GitHub에 푸시됨  
+**문제**: 영원히 히스토리에 남음. 키 탈취 위험.  
+**해결**:
+- `.env` 파일 사용
+- `.gitignore` 에 등록
+- 푸시되면 즉시 키 무효화 + 히스토리 청소
+
+### 7. 한 번에 너무 많은 파일 첨부
+
+**상황**: "이 100개 파일 다 분석해줘" → 컨텍스트 폭발  
+**해결**:
+- Glob으로 부분만: "config로 끝나는 파일들만"
+- 단계 분할: "먼저 폴더 구조만 파악해줘"
+- 큰 파일은 `head -100` 같이 일부만
+
+### 8. 결과 확인 안 하고 다음 단계로
+
+**상황**: AI가 "OK 했어요" → 그냥 다음 진행 → 나중에 망함 발견  
+**해결**:
+- 매 단계 결과를 직접 열어보기
+- `git diff` 로 변경 내역 검토
+- 빌드/테스트 돌리기
+
+### 9. 한국어/유니코드 깨짐 (Windows)
+
+**상황**: 콘솔에서 한글이 ???? 로 표시  
+**해결**:
+```bash
+chcp 65001
+```
+PowerShell이라면:
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+```
+근본 해결은 [Windows 풀가이드](/extras/windows-setup#encoding).
+
+### 10. 너무 비싼 모델 + 너무 긴 대화
+
+**상황**: Opus 모델로 큰 작업을 하루 종일 → 한도 광속 소모  
+**해결**:
+- 단순 작업은 Sonnet/Haiku
+- 큰 파일은 부분만 읽기
+- `/cost` 로 자주 체크
+
+## 🚨 진짜 위험한 실수
+
+### 데이터 날린 경우
+
+```
+> 다운로드 폴더 정리해줘
+✻ rm -rf ~/Downloads
+   1. Yes 2. No
+```
+
+여기서 **Yes 누르면 다운로드 폴더 통째로 삭제**. 무조건 멈춰서 명령 한 줄 한 줄 읽으세요.
+
+**예방책**:
+- "삭제 대신 백업 폴더로 이동" 이라고 부탁
+- `.claude/settings.json`에 `Bash(rm -rf*)` 를 deny 등록
+- [Hooks](/advanced/hooks) 로 PreToolUse 차단
+
+### 회사 코드를 공개 레포에 올린 경우
+
+```
+> 이 폴더 GitHub에 올려줘
+✻ 새 레포 만들고 있습니다 (Public)
+```
+
+**Public** 인지 **Private** 인지 꼭 확인. CLAUDE.md에 "처음 만드는 레포는 항상 Private" 등록 추천.
+
+### Force push로 동료 작업 날린 경우
+
+```
+> 충돌 났어, 강제로 푸시해줘
+✻ git push --force
+```
+
+이러면 동료가 푸시한 변경이 사라질 수 있어요. **충돌은 force push 말고, pull → resolve → push** 가 정석.
+
+## 사고 났을 때 응급 처치
+
+### 파일 변경 되돌리기
+```bash
+git status              # 뭐 바뀌었는지
+git diff                # 어떻게 바뀌었는지
+git restore <파일>       # 이 파일 변경 취소
+git restore .           # 전체 변경 취소 (커밋 안 된 것만)
+```
+
+### 마지막 커밋 되돌리기 (변경은 유지)
+```bash
+git reset HEAD~1
+```
+
+### 마지막 커밋 완전 폐기
+```bash
+git reset --hard HEAD~1   # ⚠️ 변경도 다 날아감
+```
+
+### 실수로 삭제한 파일 복구
+```bash
+git checkout HEAD -- <파일경로>
+```
+
+> 💡 헷갈리면 그냥 Claude에게: "방금 한 작업 되돌리고 싶어. 어제 커밋 상태로 가줘."
+
+## 예방이 최고
+
+### `.claude/settings.json` 권장 시작 템플릿
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Bash(npm run *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Edit(.env)",
+      "Edit(**/*.key)"
+    ],
+    "defaultMode": "default"
+  }
+}
+```
+
+### CLAUDE.md 권장 안전 문구
+
+```markdown
+# 안전 규칙
+- 파일 삭제 시 백업 폴더로 이동, `rm -rf` 금지
+- main 브랜치에 직접 push 금지, PR 통해서만
+- .env, *.key 파일 절대 수정/푸시 금지
+- 큰 변경 전엔 git commit으로 백업
+```
+
+## 다음 단계
+
+- 👉 [13 디버깅 요청하기](/practice/debugging) — 에러 났을 때 잘 시키는 법
+- 👉 [16 Hooks](/advanced/hooks) — 자동 차단 시스템 만들기

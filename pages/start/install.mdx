@@ -1,0 +1,159 @@
+---
+title: 04 · 설치와 첫 실행
+description: macOS / Windows / Linux 모두 커버. 명령어 한 줄로 설치, 첫 실행, 로그인까지.
+---
+
+# 04 · 설치와 첫 실행
+
+> 5분이면 끝나요. **막히는 곳에서 멈추고 [트러블슈팅 FAQ](/extras/troubleshooting)** 를 펴보세요.
+
+## 큰 그림
+
+설치는 3단계입니다.
+
+1. **Node.js** 설치 (Claude Code가 돌아가는 기반 도구)
+2. **Claude Code** 설치 (한 줄 명령어)
+3. **로그인** (브라우저로 자동)
+
+## 1단계 · Node.js 설치
+
+> Node.js는 자바스크립트를 컴퓨터에서 돌리는 엔진. Claude Code가 이 위에서 동작해요.
+
+### macOS / Linux
+
+방법 A — 공식 사이트 (가장 쉬움)
+1. [nodejs.org](https://nodejs.org) 접속
+2. **LTS** 버튼 클릭 → 설치 파일 다운로드
+3. 더블클릭해서 설치
+
+방법 B — 터미널로 (개발자 추천)
+```bash
+# macOS (Homebrew)
+brew install node
+
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+### Windows
+
+> 🪟 **Windows는 [Windows 환경 풀가이드](/extras/windows-setup)** 를 먼저 보세요. WSL/Git Bash/PowerShell 중 어떤 환경에서 깔지 결정하는 게 먼저예요.
+
+빠른 길:
+1. [nodejs.org](https://nodejs.org) 에서 LTS 다운로드
+2. 설치 시 "Add to PATH" 체크 ✅
+3. 설치 후 **PowerShell 재시작**
+
+### 설치 확인
+
+터미널을 열고:
+
+```bash
+node --version
+npm --version
+```
+
+`v20.xxx.x` 같은 숫자가 나오면 성공. `command not found` 가 나오면 설치 다시 또는 [트러블슈팅 FAQ](/extras/troubleshooting#node-not-found).
+
+## 2단계 · Claude Code 설치
+
+한 줄이면 됩니다.
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+### 무슨 일이 일어났나요?
+- `npm`: Node.js의 패키지 매니저 (앱스토어 같은 것)
+- `install -g`: 컴퓨터 전체에 설치 (`g` = global)
+- `@anthropic-ai/claude-code`: 패키지 이름
+
+### 설치 확인
+
+```bash
+claude --version
+```
+
+버전 숫자가 나오면 OK.
+
+> ⚠️ **Permission denied 에러?**  
+> Mac/Linux: `sudo` 붙여서 다시 시도하거나, [npm 권한 문제 해결](/extras/troubleshooting#npm-permission)  
+> Windows: PowerShell을 **관리자 권한**으로 다시 실행
+
+## 3단계 · 첫 실행과 로그인
+
+### 작업 폴더로 이동
+
+새 폴더 하나 만들어서 거기서 시작하는 게 좋아요.
+
+```bash
+mkdir my-claude-test
+cd my-claude-test
+```
+
+### Claude 실행
+
+```bash
+claude
+```
+
+이런 환영 화면이 나옵니다:
+
+```
+╭───────────────────────────╮
+│  ✻ Welcome to Claude Code  │
+╰───────────────────────────╯
+
+Sign in to your Anthropic account...
+```
+
+### 로그인
+
+엔터를 누르면 **자동으로 브라우저가 열려요.** Anthropic 계정으로 로그인 → 권한 허용 → 터미널 자동 복귀.
+
+> ❌ 브라우저가 안 열리면? 화면에 표시된 URL을 직접 복사해서 브라우저에 붙여넣기.
+
+## 첫 대화
+
+로그인되면 입력창이 나옵니다. 한국어로 부탁해보세요.
+
+```
+> 이 폴더에 뭐가 있는지 알려줘
+```
+
+비어있는 폴더라 "비어있어요" 라고 답할 거예요. 그럼 이렇게 시켜보세요.
+
+```
+> hello.txt 파일 만들어서 "안녕 클로드 코드" 라고 적어줘
+```
+
+**Yes / No** 같은 권한 확인이 뜰 거예요. **Yes** 누르면 파일이 생성됩니다.
+
+### 만들어진 파일 확인
+```bash
+ls
+cat hello.txt
+```
+
+🎉 **설치 완료!** 첫 AI와의 협업입니다.
+
+## 종료하는 법
+
+- `/exit` 입력 또는
+- `Ctrl + C` 두 번
+- 터미널 창을 그냥 닫아도 OK
+
+## 다음 단계
+
+- 👉 [05 초보자 워크플로우](/start/beginner-workflow) — "어떻게 시켜야 잘 듣지?"
+- 👉 [09 자주 쓰는 명령어](/core/commands) — `/help`, `/clear`, `/init` 등
+
+## 막혔을 때
+
+| 증상 | 해결 페이지 |
+|---|---|
+| `claude: command not found` | [트러블슈팅 → command not found](/extras/troubleshooting#claude-not-found) |
+| `Permission denied` | [트러블슈팅 → 권한 오류](/extras/troubleshooting#npm-permission) |
+| 로그인이 끝나지 않음 | [트러블슈팅 → 로그인 문제](/extras/troubleshooting#login) |
+| 한국어 깨짐 | [Windows 가이드 → 인코딩](/extras/windows-setup#encoding) |

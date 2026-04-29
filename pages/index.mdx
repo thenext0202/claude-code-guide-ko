@@ -1,0 +1,599 @@
+---
+title: Claude Code 한국어 입문 가이드
+description: 코딩을 몰라도 따라 할 수 있는 Claude Code 입문서. 설치부터 MCP, Hooks, Skills, 서브에이전트까지.
+---
+
+import Link from 'next/link'
+import { Reveal } from '../components/Reveal'
+import { TiltCard } from '../components/TiltCard'
+
+<div className="hero">
+  <div className="hero-credit">제작 · 정금구</div>
+  <div className="hero-inner">
+    <Reveal variant="fade">
+      <span className="hero-badge">Claude Code · 한국어 입문 · 2026</span>
+    </Reveal>
+    <Reveal variant="up" delay={120}>
+      <h1 className="hero-title">코딩 몰라도 OK.<br /><span className="hero-accent">Claude Code</span>로 시작하기.</h1>
+    </Reveal>
+    <Reveal variant="up" delay={240}>
+      <div className="hero-sub">
+        터미널이 처음이라도 따라올 수 있는 가장 친절한 한국어 가이드.<br/>
+        설치 · 명령어 · GitHub · MCP · Hooks · Skills · 서브에이전트까지 한 권으로.
+      </div>
+    </Reveal>
+    <Reveal variant="up" delay={360}>
+      <div className="hero-cta">
+        <Link href="/start/before-you-start" className="btn btn-primary">
+          <span>지금 시작하기</span>
+          <span className="btn-arrow">→</span>
+        </Link>
+        <Link href="/extras/windows-setup" className="btn btn-ghost">
+          🪟 Windows 풀 셋업
+        </Link>
+      </div>
+    </Reveal>
+    <Reveal variant="fade" delay={500}>
+      <div className="hero-meta">
+        <span>📚 25개 섹션</span>
+        <span>·</span>
+        <span>🌱 코딩 무경험 OK</span>
+        <span>·</span>
+        <span>🇰🇷 100% 한국어</span>
+      </div>
+    </Reveal>
+  </div>
+  <div className="hero-glow" aria-hidden="true" />
+</div>
+
+<section className="features">
+  <Reveal variant="up">
+    <h2 className="section-title">이 가이드의 특징</h2>
+  </Reveal>
+  <div className="cards">
+    {[
+      { icon: '🌱', title: '코딩 0년차도 OK', desc: '"터미널이 뭐예요?" 부터 시작합니다. 어려운 용어 대신 일상 비유로 설명해요.' },
+      { icon: '🛠', title: '실전 예제 중심', desc: '"이런 상황엔 이렇게" 하는 실제 사용 예시를 모든 섹션에 포함했어요.' },
+      { icon: '🪟', title: 'Windows 친화적', desc: 'WSL/Git Bash/PowerShell 차이부터 설치까지 한국 사용자가 가장 막히는 구간을 풀가이드로.' },
+      { icon: '🚀', title: '고급 기능까지', desc: 'MCP, Hooks, Skills, 서브에이전트 — Claude Code의 진짜 힘을 끌어내는 법.' },
+      { icon: '💸', title: '비용 관리', desc: '"토큰이 뭔데 돈이 빠져?" — 요금제 선택부터 절약 패턴까지.' },
+      { icon: '🔧', title: '트러블슈팅 FAQ', desc: '에러 메시지를 검색해도 한국어 답이 안 나올 때 펴보는 응급실.' }
+    ].map((f, i) => (
+      <Reveal key={i} variant="up" delay={i * 80}>
+        <TiltCard className="card">
+          <div className="card-icon">{f.icon}</div>
+          <h3>{f.title}</h3>
+          <p>{f.desc}</p>
+        </TiltCard>
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+<section className="audience">
+  <Reveal variant="up">
+    <h2 className="section-title">이런 분께 추천해요</h2>
+  </Reveal>
+  <div className="audience-list">
+    {[
+      { tag: '👤 비개발자', desc: '폴더 정리, 문서 자동화, 데이터 표 만들기 같은 반복 작업을 AI에게 시키고 싶은 분' },
+      { tag: '👨‍💻 입문 개발자', desc: 'AI 페어 프로그래밍에 익숙해지고 싶은 분, 1인 개발자가 되고 싶은 분' },
+      { tag: '🧑‍🚀 중급 이상', desc: 'MCP · Skills · 서브에이전트로 자기만의 자동화 워크스페이스를 짜고 싶은 분' }
+    ].map((a, i) => (
+      <Reveal key={i} variant="up" delay={i * 100}>
+        <div className="audience-item">
+          <strong>{a.tag}</strong>
+          <span>{a.desc}</span>
+        </div>
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+<section className="quickstart">
+  <Reveal variant="up">
+    <h2 className="section-title">3분 빠른 시작</h2>
+  </Reveal>
+  <div className="quickstart-grid">
+    <Reveal variant="up" delay={0}>
+      <TiltCard className="qs-step">
+        <div className="qs-num">1</div>
+        <h4>Node.js 설치</h4>
+        <p>nodejs.org에서 LTS 버전 다운로드 후 설치</p>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={90}>
+      <TiltCard className="qs-step">
+        <div className="qs-num">2</div>
+        <h4>Claude Code 설치</h4>
+        <pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={180}>
+      <TiltCard className="qs-step">
+        <div className="qs-num">3</div>
+        <h4>실행 + 로그인</h4>
+        <pre><code>claude</code></pre>
+        <p>작업할 폴더로 이동한 뒤 위 명령. 처음엔 브라우저 로그인.</p>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={270}>
+      <TiltCard className="qs-step">
+        <div className="qs-num">4</div>
+        <h4>대화 시작</h4>
+        <p>"이 폴더에 뭐가 있는지 알려줘" 같은 한국어로 부탁하면 됩니다.</p>
+      </TiltCard>
+    </Reveal>
+  </div>
+  <Reveal variant="fade" delay={400}>
+    <div className="quickstart-cta">
+      <Link href="/start/install" className="btn btn-primary-sm">자세한 설치 가이드 →</Link>
+    </div>
+  </Reveal>
+</section>
+
+<section className="toc-preview">
+  <Reveal variant="up">
+    <h2 className="section-title">전체 목차 미리보기</h2>
+  </Reveal>
+  <div className="toc-grid">
+    <Reveal variant="up" delay={0}>
+      <TiltCard className="toc-card">
+        <h3>시작하기</h3>
+        <ul>
+          <li><Link href="/start/before-you-start">시작하기 전에</Link></li>
+          <li><Link href="/start/what-is-claude-code">Claude Code란?</Link></li>
+          <li><Link href="/start/use-cases">어떤 일을 시킬 수 있나요?</Link></li>
+          <li><Link href="/start/install">설치와 첫 실행</Link></li>
+          <li><Link href="/start/beginner-workflow">초보자 워크플로우</Link></li>
+        </ul>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={80}>
+      <TiltCard className="toc-card">
+        <h3>핵심 개념</h3>
+        <ul>
+          <li><Link href="/core/plugins">플러그인 사용법</Link></li>
+          <li><Link href="/core/concepts">Context · Tools · Permissions</Link></li>
+          <li><Link href="/core/claude-md">CLAUDE.md — 장기 기억</Link></li>
+          <li><Link href="/core/commands">자주 쓰는 명령어</Link></li>
+          <li><Link href="/core/sessions">세션 관리</Link></li>
+        </ul>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={160}>
+      <TiltCard className="toc-card">
+        <h3>실전 활용</h3>
+        <ul>
+          <li><Link href="/practice/github">GitHub와 함께 쓰기</Link></li>
+          <li><Link href="/practice/common-mistakes">자주 하는 실수</Link></li>
+          <li><Link href="/practice/debugging">디버깅 요청하기</Link></li>
+          <li><Link href="/practice/useful-features">알면 편한 기능</Link></li>
+        </ul>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={240}>
+      <TiltCard className="toc-card">
+        <h3>고급 기능</h3>
+        <ul>
+          <li><Link href="/advanced/mcp">MCP — 외부 도구 연결</Link></li>
+          <li><Link href="/advanced/hooks">Hooks — 안전장치</Link></li>
+          <li><Link href="/advanced/skills">Skills — 작업 레시피</Link></li>
+          <li><Link href="/advanced/subagents">Sub-agents</Link></li>
+          <li><Link href="/advanced/workspace">워크스페이스 설계</Link></li>
+        </ul>
+      </TiltCard>
+    </Reveal>
+    <Reveal variant="up" delay={320}>
+      <TiltCard className="toc-card toc-card-bonus">
+        <h3>보너스 — 이 가이드만의 추가</h3>
+        <ul>
+          <li><Link href="/extras/windows-setup">🪟 Windows 환경 풀가이드</Link></li>
+          <li><Link href="/extras/troubleshooting">🔧 트러블슈팅 FAQ</Link></li>
+        </ul>
+      </TiltCard>
+    </Reveal>
+  </div>
+</section>
+
+<section className="closing">
+  <Reveal variant="zoom">
+    <div className="closing-inner">
+      <h2>준비됐다면, 첫 페이지부터.</h2>
+      <p>거창하게 시작할 필요 없어요. "터미널 켜기"부터 같이 해봐요.</p>
+      <Link href="/start/before-you-start" className="btn btn-primary-lg">
+        <span>00 시작하기 전에</span>
+        <span className="btn-arrow">→</span>
+      </Link>
+    </div>
+  </Reveal>
+</section>
+
+<style jsx global>{`
+  .reveal {
+    opacity: 0;
+    transition-property: opacity, transform;
+    transition-duration: 0.8s;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-up { transform: translateY(36px); }
+  .reveal-left { transform: translateX(-36px); }
+  .reveal-right { transform: translateX(36px); }
+  .reveal-fade { transform: none; }
+  .reveal-zoom { transform: scale(0.94); }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+
+  .tilt-card {
+    transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1),
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+    position: relative;
+    overflow: hidden;
+  }
+  .tilt-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle 240px at var(--tilt-mx, 50%) var(--tilt-my, 50%),
+      rgba(255, 122, 89, 0.22),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tilt-card:hover::before { opacity: 1; }
+  .tilt-card > * { position: relative; z-index: 2; }
+`}</style>
+
+<style jsx>{`
+  .hero,
+  .features,
+  .audience,
+  .quickstart,
+  .toc-preview,
+  .closing {
+    margin-left: calc(-1 * var(--landing-bleed, 24px));
+    margin-right: calc(-1 * var(--landing-bleed, 24px));
+    padding-left: var(--landing-bleed, 24px);
+    padding-right: var(--landing-bleed, 24px);
+  }
+
+  .hero {
+    padding: 110px 24px 72px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(127, 127, 127, 0.15);
+  }
+  .hero-credit {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    opacity: 0.45;
+    z-index: 3;
+  }
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255, 122, 89, 0.22), transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 80%, rgba(212, 100, 27, 0.14), transparent 60%);
+    pointer-events: none;
+    animation: float 12s ease-in-out infinite alternate;
+  }
+  @keyframes float {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-2%, 2%, 0) scale(1.04); }
+  }
+  .hero-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255, 122, 89, 0.12);
+    color: #ff7a59;
+    border: 1px solid rgba(255, 122, 89, 0.3);
+    margin-bottom: 28px;
+    letter-spacing: 0.3px;
+  }
+  .hero-title {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 22px;
+    letter-spacing: -1.2px;
+  }
+  .hero-accent {
+    background: linear-gradient(135deg, #ff7a59, #d4641b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-sub {
+    font-size: clamp(15px, 2vw, 18px);
+    line-height: 1.7;
+    opacity: 0.82;
+    margin: 0 auto 36px;
+    max-width: 640px;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    font-size: 13px;
+    opacity: 0.6;
+    flex-wrap: wrap;
+  }
+
+  :global(.btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition:
+      transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.22s ease,
+      filter 0.22s ease,
+      background 0.22s ease,
+      border-color 0.22s ease;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  :global(.btn::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s ease;
+    z-index: -1;
+    pointer-events: none;
+  }
+  :global(.btn:hover::after) { transform: translateX(120%); }
+  :global(.btn:hover) { transform: translateY(-2px) scale(1.02); }
+  :global(.btn:active) { transform: translateY(0) scale(0.98); }
+  :global(.btn-arrow) {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  :global(.btn:hover .btn-arrow) { transform: translateX(4px); }
+
+  :global(.btn-primary) {
+    background: linear-gradient(135deg, #ff7a59, #d4641b);
+    color: white;
+    box-shadow: 0 6px 20px rgba(255, 122, 89, 0.32);
+  }
+  :global(.btn-primary:hover) {
+    box-shadow: 0 12px 32px rgba(255, 122, 89, 0.45);
+    filter: brightness(1.06);
+  }
+  :global(.btn-primary-sm) {
+    background: linear-gradient(135deg, #ff7a59, #d4641b);
+    color: white;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(255, 122, 89, 0.28);
+  }
+  :global(.btn-primary-sm:hover) {
+    box-shadow: 0 8px 22px rgba(255, 122, 89, 0.4);
+    filter: brightness(1.06);
+  }
+  :global(.btn-primary-lg) {
+    background: linear-gradient(135deg, #ff7a59, #d4641b);
+    color: white;
+    padding: 16px 32px;
+    font-size: 17px;
+    box-shadow: 0 8px 24px rgba(255, 122, 89, 0.38);
+  }
+  :global(.btn-primary-lg:hover) {
+    box-shadow: 0 16px 40px rgba(255, 122, 89, 0.5);
+    filter: brightness(1.08);
+  }
+  :global(.btn-ghost) {
+    border: 1px solid rgba(127, 127, 127, 0.3);
+    background: transparent;
+  }
+  :global(.btn-ghost:hover) {
+    border-color: rgba(255, 122, 89, 0.6);
+    background: rgba(255, 122, 89, 0.06);
+  }
+
+  .features, .audience, .quickstart, .toc-preview {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 84px 24px;
+  }
+  .section-title {
+    text-align: center;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 800;
+    margin: 0 0 44px;
+    letter-spacing: -0.5px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  :global(.card) {
+    padding: 28px;
+    border-radius: 16px;
+    border: 1px solid rgba(127, 127, 127, 0.18);
+    background: rgba(127, 127, 127, 0.04);
+    cursor: default;
+  }
+  :global(.card:hover) {
+    border-color: rgba(255, 122, 89, 0.5);
+    box-shadow: 0 18px 40px -16px rgba(255, 122, 89, 0.35);
+  }
+  :global(.card-icon) {
+    font-size: 32px;
+    margin-bottom: 14px;
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  :global(.card:hover .card-icon) {
+    transform: rotate(-8deg) scale(1.15);
+  }
+  :global(.card h3) { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+  :global(.card p) { margin: 0; font-size: 14px; line-height: 1.65; opacity: 0.78; }
+
+  .audience-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .audience-item {
+    padding: 24px 26px;
+    border-radius: 14px;
+    background: rgba(127, 127, 127, 0.05);
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+                background 0.25s, border-color 0.25s;
+  }
+  .audience-item:hover {
+    transform: translateX(4px);
+    background: rgba(255, 122, 89, 0.06);
+    border-color: rgba(255, 122, 89, 0.25);
+  }
+  .audience-item strong { font-size: 16px; }
+  .audience-item span { font-size: 14px; line-height: 1.6; opacity: 0.78; }
+
+  .quickstart {
+    background: rgba(127, 127, 127, 0.04);
+  }
+  .quickstart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  :global(.qs-step) {
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid rgba(127, 127, 127, 0.18);
+    background: white;
+  }
+  :global(.dark .qs-step) { background: rgba(255, 255, 255, 0.03); }
+  :global(.qs-step:hover) {
+    border-color: rgba(255, 122, 89, 0.5);
+    box-shadow: 0 18px 40px -16px rgba(255, 122, 89, 0.3);
+  }
+  :global(.qs-num) {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff7a59, #d4641b);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 14px;
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  :global(.qs-step:hover .qs-num) { transform: rotate(8deg) scale(1.1); }
+  :global(.qs-step h4) { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
+  :global(.qs-step p) { margin: 8px 0 0; font-size: 13px; line-height: 1.6; opacity: 0.78; }
+  :global(.qs-step pre) {
+    margin: 6px 0 0;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    font-size: 13px;
+    overflow-x: auto;
+  }
+  :global(.dark .qs-step pre) { background: rgba(255, 255, 255, 0.06); }
+  .quickstart-cta { text-align: center; }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  :global(.toc-card) {
+    padding: 24px 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(127, 127, 127, 0.18);
+  }
+  :global(.toc-card:hover) {
+    border-color: rgba(255, 122, 89, 0.45);
+    box-shadow: 0 16px 36px -16px rgba(255, 122, 89, 0.3);
+  }
+  :global(.toc-card h3) { margin: 0 0 14px; font-size: 16px; font-weight: 700; }
+  :global(.toc-card ul) { list-style: none; padding: 0; margin: 0; }
+  :global(.toc-card li) {
+    padding: 6px 0;
+    font-size: 14px;
+    transition: transform 0.2s ease;
+  }
+  :global(.toc-card li:hover) { transform: translateX(4px); }
+  :global(.toc-card a) {
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.78;
+    transition: color 0.2s, opacity 0.2s;
+  }
+  :global(.toc-card a:hover) { color: #ff7a59; opacity: 1; }
+  :global(.toc-card-bonus) {
+    background: linear-gradient(135deg, rgba(255, 122, 89, 0.1), rgba(212, 100, 27, 0.05));
+    border-color: rgba(255, 122, 89, 0.35);
+  }
+
+  .closing {
+    padding: 110px 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(255, 122, 89, 0.12), transparent 70%);
+  }
+  .closing-inner { max-width: 600px; margin: 0 auto; }
+  .closing h2 {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    margin: 0 0 14px;
+    letter-spacing: -0.8px;
+  }
+  .closing p { font-size: 16px; opacity: 0.78; margin: 0 0 28px; }
+`}</style>

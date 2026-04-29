@@ -1,0 +1,280 @@
+---
+title: 🪟 Windows 환경 풀 셋업 가이드
+description: WSL/Git Bash/PowerShell 차이부터 한국어 인코딩, 권한 문제까지. Windows 사용자가 가장 많이 막히는 구간 정리.
+---
+
+# 🪟 Windows 환경 풀 셋업 가이드
+
+> 한국 사용자 첫 1주일 막힘의 90%는 **Windows 환경 문제**에서 옵니다. 이 페이지 한 번에 다 해결.
+
+## 핵심 결정 — 어디서 Claude를 돌릴까?
+
+Windows에선 **3가지 선택지**가 있어요.
+
+| 환경 | 장점 | 단점 | 추천도 |
+|---|---|---|---|
+| **WSL (Ubuntu)** | macOS/Linux와 동일한 환경, 호환성 최강 | 설정 복잡, 디스크 공간 추가 | ⭐⭐⭐⭐⭐ |
+| **Git Bash** | 가벼움, 설치 한 번이면 끝 | 일부 명령어 호환성 문제 | ⭐⭐⭐⭐ |
+| **PowerShell** | Windows 네이티브, 추가 설치 X | bash 스크립트 호환 거의 X | ⭐⭐⭐ |
+
+### 추천 결정 흐름
+
+```
+개발자다 / 프로그램 짤 거다       → WSL 추천
+가끔 사용 / 비개발자 / 가볍게     → Git Bash
+회사 정책상 WSL 안 됨            → PowerShell + WSL 호환 도구
+```
+
+## 옵션 A · WSL 설치 (가장 추천)
+
+### 1. WSL 활성화
+
+PowerShell을 **관리자 권한**으로 열고:
+
+```powershell
+wsl --install
+```
+
+이 한 줄로 끝. 자동으로 Ubuntu가 깔립니다.
+
+### 2. 재부팅
+
+설치 끝나면 재부팅. 그 후 시작 메뉴에서 "Ubuntu" 검색해서 실행.
+
+### 3. 사용자 계정 만들기
+
+처음 실행하면 사용자명 / 비밀번호 묻습니다. 짧고 영문으로 (한글 X).
+
+### 4. 패키지 업데이트
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### 5. Node.js 설치
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+node --version
+```
+
+### 6. Claude Code 설치
+
+```bash
+sudo npm install -g @anthropic-ai/claude-code
+claude --version
+```
+
+### 7. Windows 폴더 접근
+
+WSL에서 Windows 폴더는 `/mnt/c/...` 로 접근:
+
+```bash
+cd /mnt/c/Users/내이름/Desktop
+claude
+```
+
+> 💡 **속도 팁**: WSL 안에서 작업할 폴더는 `/home/내이름/` 아래에 두는 게 훨씬 빨라요. `/mnt/c/...` 는 느립니다.
+
+## 옵션 B · Git Bash 설치
+
+### 1. Git for Windows 설치
+
+[git-scm.com](https://git-scm.com/download/win) 에서 다운로드. 설치 시 옵션 추천:
+- "Git Bash Here" 체크
+- 기본 에디터: VS Code 추천
+- PATH: "Git from the command line and 3rd-party software"
+- 줄바꿈: "Checkout as-is, commit Unix-style"
+
+### 2. Node.js 설치
+
+[nodejs.org](https://nodejs.org) → LTS 다운로드 → 설치 시 "Add to PATH" 체크.
+
+### 3. Git Bash 열기
+
+시작 메뉴 → "Git Bash" → 다음:
+
+```bash
+node --version
+npm --version
+```
+
+### 4. Claude Code 설치
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+> ⚠️ **Permission Denied 에러**?
+> Windows의 npm 글로벌 폴더 권한 문제. 해결:
+> ```bash
+> npm config set prefix ~/npm-global
+> echo 'export PATH=~/npm-global/bin:$PATH' >> ~/.bashrc
+> source ~/.bashrc
+> ```
+
+## 옵션 C · PowerShell
+
+### 1. Node.js 설치
+
+[nodejs.org](https://nodejs.org) → LTS 다운로드 → "Add to PATH" 체크.
+
+### 2. PowerShell **관리자 권한** 으로 실행
+
+검색 → PowerShell → 우클릭 "관리자로 실행"
+
+### 3. 실행 정책 설정 (한 번만)
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### 4. Claude Code 설치
+
+```powershell
+npm install -g @anthropic-ai/claude-code
+```
+
+## 한국어 / 인코딩 문제
+
+### 콘솔에서 한글이 ???? 로 표시
+
+**Git Bash / PowerShell**:
+```bash
+chcp 65001
+```
+
+**PowerShell 영구 적용** — `$PROFILE` 파일에:
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 > $null
+```
+
+**WSL**: 거의 문제 없음. 만약 깨지면:
+```bash
+sudo locale-gen ko_KR.UTF-8
+```
+
+### 파일 저장 시 한글 깨짐
+
+에디터 인코딩을 **UTF-8 (BOM 없음)** 으로 통일.
+- VS Code: 우하단 인코딩 클릭 → "Save with Encoding" → UTF-8
+
+### 파일명에 한글 → 명령어 인식 못 함
+
+가능하면 **영문 폴더/파일명** 사용. 어쩔 수 없으면 따옴표로 감싸기:
+```bash
+cd "프로젝트 폴더"
+```
+
+## 자주 만나는 Windows 전용 에러
+
+### `'claude'은(는) 내부 또는 외부 명령... 인식되지 않습니다`
+
+PATH에 npm 글로벌 폴더가 없음.
+
+**확인**:
+```bash
+npm config get prefix
+```
+
+이 경로의 하위에 `claude.cmd` 가 있어야 해요. PATH에 그 경로 추가:
+- 시스템 환경변수 편집 → Path → 새로 만들기 → 위 경로 추가
+- 터미널 재시작
+
+### `Cannot find module 'X'`
+
+WSL과 Windows에서 같은 폴더 npm install 했을 때 발생 가능. WSL 폴더에서는 WSL에서, Windows 폴더에서는 Windows에서 — **분리해서 install**.
+
+### `EACCES: permission denied`
+
+npm 글로벌 폴더 권한 문제.
+
+**해결**:
+```bash
+npm config set prefix ~/npm-global
+echo 'export PATH=~/npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### `EPERM: operation not permitted`
+
+대부분 백신 / Windows Defender 가 차단. 임시 해제 또는 `node_modules` 폴더를 예외에 추가.
+
+### 줄바꿈 (CRLF vs LF) 이슈
+
+```bash
+git config --global core.autocrlf input    # WSL/Mac/Linux와 호환
+git config --global core.eol lf
+```
+
+### 긴 경로 에러 (Path too long)
+
+Windows 기본 260자 제한. 해결:
+
+PowerShell 관리자:
+```powershell
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+                 -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
+재부팅.
+
+## 추천 도구
+
+### 터미널
+- **Windows Terminal** (Microsoft Store 무료) — 탭 / 분할 / 테마. 무조건 추천.
+
+### 에디터
+- **VS Code** — Claude Code와 IDE 통합 가능 (`/ide`)
+- 한국어 폰트: D2Coding, Pretendard, JetBrains Mono
+
+### Windows Terminal 한국어 폰트 설정
+
+Settings → Profile → Appearance → Font face: `D2Coding` 또는 `Cascadia Code KR`
+
+## VS Code 통합 (선택)
+
+```bash
+claude --ide
+```
+
+VS Code 안에서 Claude Code 채팅이 떠요. 코드 보면서 동시에 부탁 가능.
+
+확장 프로그램으로 더 깊은 통합도 가능 — VS Code Marketplace에서 "Claude" 검색.
+
+## 회사 보안 환경에서
+
+### 프록시 설정
+```bash
+npm config set proxy http://proxy.company.com:8080
+npm config set https-proxy http://proxy.company.com:8080
+```
+
+### 자체 서명 인증서
+```bash
+npm config set strict-ssl false   # 임시 — 보안 문제 있을 수 있음
+```
+근본 해결은 회사 인증서를 시스템에 추가.
+
+### IT 정책으로 WSL 못 쓰면
+- Git Bash 또는 PowerShell로 진행
+- 또는 Linux VM (VirtualBox / Hyper-V)
+
+## 안 풀릴 때 진단 순서
+
+```
+1. node --version, npm --version 정상?
+2. claude --version 정상?
+3. PATH에 npm global bin 들어있나?
+4. 인코딩 chcp 65001?
+5. 백신 / Defender 예외?
+6. 회사 프록시?
+7. 그래도 안 되면 [트러블슈팅 FAQ](/extras/troubleshooting)
+```
+
+## 다음 단계
+
+- 👉 [04 설치와 첫 실행](/start/install) — Windows 셋업 끝났으면 본 설치
+- 👉 [🔧 트러블슈팅 FAQ](/extras/troubleshooting) — 그래도 안 되면

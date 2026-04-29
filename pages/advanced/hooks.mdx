@@ -1,0 +1,285 @@
+---
+title: 16 · Hooks — 안전장치와 알림
+description: 위험한 명령 차단, 작업 끝났을 때 알림 등 — 도구 사용 전후에 자동 실행되는 스크립트.
+---
+
+# 16 · Hooks — 안전장치와 알림
+
+## Hooks가 뭐예요?
+
+> **Hooks = Claude가 도구를 쓰기 전/후에 자동 실행되는 짧은 스크립트**
+
+특정 이벤트가 일어나면 미리 정해둔 명령이 자동 실행돼요.
+
+비유하면 — **현관문에 자동 인사 센서, 또는 위험 명령 차단 게이트.**
+
+## 무엇에 쓰나요?
+
+### 1. 🛡 위험한 명령 자동 차단
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/scripts/block-rm.js"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+`block-rm.js` 가 `rm -rf` 같은 명령을 감지하면 **차단**. AI가 실수로도 못 함.
+
+### 2. 🔔 작업 완료 알림
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude 작업 끝!\" with title \"Claude Code\"'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+작업이 끝나면 macOS 알림 팝. 다른 일 하다가 알 수 있음.
+
+### 3. 📝 자동 로깅
+
+모든 도구 사용을 파일로 기록:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$(date): $CLAUDE_TOOL_NAME\" >> ~/.claude/audit.log"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 4. 🚨 코드 변경 후 자동 테스트
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "npm test" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+파일 편집할 때마다 테스트가 자동 실행.
+
+### 5. 🎤 음성 알림
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say '클로드 작업 완료'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> macOS `say`. Windows는 PowerShell의 `Add-Type` 으로 가능.
+
+## 어디에 설정하나요?
+
+`.claude/settings.json` (프로젝트) 또는 `~/.claude/settings.json` (전역).
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [...],
+    "PostToolUse": [...],
+    "Stop": [...],
+    "UserPromptSubmit": [...],
+    "Notification": [...]
+  }
+}
+```
+
+## 후크 이벤트 종류
+
+| 이벤트 | 언제 실행? |
+|---|---|
+| **PreToolUse** | 도구 쓰기 직전 |
+| **PostToolUse** | 도구 사용 직후 |
+| **UserPromptSubmit** | 사용자가 메시지 보낼 때 |
+| **Stop** | Claude가 응답 끝낼 때 |
+| **Notification** | 알림 발생 시 |
+| **SessionStart** | 세션 시작 시 |
+| **SessionEnd** | 세션 끝날 때 |
+
+## 후크 매처 (어떤 도구만 감시할지)
+
+```json
+"matcher": "Bash"           // Bash만
+"matcher": "Edit|Write"     // Edit 또는 Write
+"matcher": "*"              // 모든 도구
+"matcher": "mcp__github__*" // GitHub MCP의 모든 도구
+```
+
+## 후크 스크립트 예시 (PreToolUse 차단)
+
+`~/.claude/scripts/block-dangerous.js`:
+
+```javascript
+#!/usr/bin/env node
+let input = '';
+process.stdin.on('data', chunk => input += chunk);
+process.stdin.on('end', () => {
+  const data = JSON.parse(input);
+  const cmd = data.tool_input?.command || '';
+
+  const dangerous = [
+    /rm\s+-rf\s+\//,
+    /:(){ :|:& };:/,           // fork bomb
+    /dd\s+if=.*\s+of=\/dev/,
+    /git\s+push\s+--force/,
+  ];
+
+  for (const pat of dangerous) {
+    if (pat.test(cmd)) {
+      console.error(JSON.stringify({
+        decision: "block",
+        reason: `차단된 위험 명령: ${cmd}`
+      }));
+      process.exit(0);
+    }
+  }
+});
+```
+
+> 후크는 stdin으로 도구 정보를 받고, stdout으로 결과 반환. `decision: "block"` 이면 도구 실행이 막힘.
+
+## 후크 만들 때 주의사항
+
+### ✅ 좋은 패턴
+- 빠르게 끝나야 함 (1초 이내가 이상적)
+- 실패해도 Claude가 멈추지 않게 (exit 0 권장, 차단 시만 명시)
+- 로그 남기기 (디버깅용)
+
+### ❌ 나쁜 패턴
+- 후크 안에서 또 Claude 부르기 (무한 루프)
+- 너무 무거운 작업 (느려짐)
+- 인터랙티브 명령 (Claude는 답할 수 없음)
+
+## 실전 패턴 모음
+
+### 패턴 1 · 운영 환경 보호
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "grep -E '(production|prod)' && exit 1 || exit 0"
+        }]
+      }
+    ]
+  }
+}
+```
+"production"이라는 단어가 들어간 명령은 차단.
+
+### 패턴 2 · 자동 git commit
+편집 후 자동으로 변경 커밋:
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "git add . && git commit -m 'auto: claude edit' --no-verify || true"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### 패턴 3 · Slack 보고
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "curl -X POST $SLACK_WEBHOOK -d '{\"text\":\"Claude 작업 완료\"}'"
+        }]
+      }
+    ]
+  }
+}
+```
+
+## 자주 묻는 질문
+
+<details>
+<summary><b>Q. 후크가 작동 안 해요</b></summary>
+
+1. settings.json 문법 점검 (JSON 검증)
+2. 명령 실행 권한 (chmod +x)
+3. 절대 경로 사용
+4. `claude --debug` 로 후크 호출 로그 확인
+</details>
+
+<details>
+<summary><b>Q. Windows에서도 되나요?</b></summary>
+
+네. PowerShell 명령으로 작성하거나, WSL 환경에서 bash 스크립트.
+</details>
+
+<details>
+<summary><b>Q. Hooks vs Skills 차이?</b></summary>
+
+- **Hooks**: 자동 실행 (사용자 의지와 무관)
+- **Skills**: 사용자가 명시적으로 호출 (`/스킬명`)
+</details>
+
+## 다음 단계
+
+- 👉 [17 Skills](/advanced/skills) — 명시적 매크로
+- 👉 [19 워크스페이스 설계](/advanced/workspace) — 후크/스킬 조합 사례

@@ -1,0 +1,249 @@
+---
+title: 19 · 나만의 워크스페이스 설계
+description: CLAUDE.md + 권한 + Skills + Hooks + MCP를 조합한 개인 AI 워크스페이스.
+---
+
+# 19 · 나만의 워크스페이스 설계
+
+> "도구는 다 알았는데, 어떻게 묶어서 써야 진짜 강력해지나요?"
+
+이 페이지는 **앞 챕터의 모든 도구를 합쳐서** 나만의 자동화 시스템을 짜는 법입니다.
+
+## 워크스페이스 구성요소
+
+```
+나만의 워크스페이스
+├── ~/.claude/                  ← 전역 (모든 작업)
+│   ├── CLAUDE.md              ← 내 프로필 / 선호
+│   ├── settings.json          ← 권한, 후크
+│   ├── skills/                ← 내 매크로
+│   ├── agents/                ← 내 서브에이전트
+│   └── mcp.json               ← 외부 서비스 연결
+│
+└── 프로젝트/.claude/           ← 프로젝트별
+    ├── CLAUDE.md              ← 이 프로젝트 규칙
+    ├── settings.json          ← 이 프로젝트 권한
+    └── skills/                ← 이 프로젝트 매크로
+```
+
+전역 + 프로젝트 = 두 층으로 쌓는 게 핵심.
+
+## 시작 템플릿 (복붙용)
+
+### `~/.claude/CLAUDE.md` (전역)
+
+```markdown
+# 사용자 정보
+- 이름: [본인 이름]
+- 역할: [예: 1인 개발자, 마케터]
+- 선호 언어: 한국어
+- 주 사용 OS: macOS / Windows / Linux
+
+# 일반 선호
+- 답변은 한국어로
+- 코드 주석은 한국어, 변수명/함수명은 영어
+- 큰 변경 전엔 항상 git commit으로 백업
+- 위험한 작업(rm, force push)은 항상 확인 받음
+
+# 메모리 시스템
+지속 정보는 `~/.claude/memory/` 폴더에 자동 저장됨.
+```
+
+### `~/.claude/settings.json` (전역)
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Bash(git status)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(npm install)",
+      "Bash(npm run *)",
+      "Bash(ls*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Edit(.env)",
+      "Edit(**/*.key)",
+      "Edit(**/secrets.*)"
+    ],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude 작업 완료\" with title \"Claude Code\"'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 자주 쓰는 Skills
+
+```
+~/.claude/skills/
+├── git-clean/SKILL.md          ← 안전한 커밋 + 푸시
+├── cleanup/SKILL.md            ← 폴더 정리
+├── translate/SKILL.md          ← 번역
+├── meeting-notes/SKILL.md      ← 회의록 정리
+└── code-review/SKILL.md        ← 자가 코드 리뷰
+```
+
+## 직군별 워크스페이스 사례
+
+### 🧑‍💻 1인 개발자
+
+**전역 settings.json 추가**
+```json
+"hooks": {
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "npm run lint --silent || true"
+      }]
+    }
+  ]
+}
+```
+편집 시 자동 lint.
+
+**프로젝트별 CLAUDE.md**
+```markdown
+# 기술 스택
+- Next.js 14 + Tailwind + Prisma
+- 배포: Railway
+- DB: PostgreSQL
+
+# 컨벤션
+- 함수형 컴포넌트만
+- Server Actions 우선, API Route 최소화
+- 모든 mutation은 트랜잭션으로
+
+# 자주 쓰는 명령
+- 개발: `npm run dev`
+- 빌드: `npm run build`
+- DB 스키마: `npx prisma studio`
+```
+
+### 🎨 디자인·기획
+
+**Skills**
+- `/poster-spec` — 포스터 시안 명세서 자동 생성
+- `/figma-export` — Figma MCP로 컴포넌트 → 스펙 문서
+
+**MCP**
+- Figma, Notion, Slack
+
+### 📊 데이터 분석
+
+**전역 CLAUDE.md**
+```markdown
+# 분석 환경
+- Python 3.11, pandas, polars
+- Jupyter 대신 .py 스크립트 선호
+- 차트는 plotly
+
+# 데이터 위치
+- `data/raw/` : 원본 (수정 금지)
+- `data/processed/` : 가공본
+- `outputs/` : 결과물
+```
+
+**MCP**: PostgreSQL, BigQuery, Google Sheets
+
+### 📝 작가·콘텐츠
+
+**Skills**
+- `/blog-draft` — 주제 → 초안
+- `/translate-en` — 한 → 영
+- `/seo-check` — SEO 점검 + 개선 제안
+
+**전역 CLAUDE.md**
+```markdown
+# 글쓰기 톤
+- 평어체, 정중한 어조
+- 한 문단 3-4줄
+- 영어 단어는 최소화
+- 비유와 예시 풍부하게
+```
+
+## 단계별 구축 가이드
+
+### Day 1 · 기본 안전장치
+
+1. `~/.claude/settings.json` 만들기 → deny 리스트 추가
+2. `~/.claude/CLAUDE.md` 만들기 → 본인 정보 + 일반 선호
+
+### Day 2 · 첫 스킬
+
+가장 자주 하는 작업 1개를 스킬로:
+```
+~/.claude/skills/cleanup/SKILL.md
+```
+
+### Day 3 · 프로젝트별 분리
+
+작업 중인 프로젝트의 `.claude/CLAUDE.md` 작성. `/init` 명령 추천.
+
+### Day 4 · 후크 한 개
+
+작업 완료 알림이라도 좋아요. 한 번 set up 해두면 평생.
+
+### Day 5 · MCP 한 개
+
+GitHub 또는 Slack 중 본인이 가장 자주 쓰는 것.
+
+### Week 2 · 서브에이전트
+
+특화된 작업이 있으면 (예: 코드 리뷰, 보안 검토) 전용 에이전트 만들기.
+
+## 안티패턴
+
+### ❌ 너무 많이 한꺼번에
+모든 도구를 하루에 다 set up하려 하면 망합니다. **하나씩, 검증하면서.**
+
+### ❌ 나만 아는 비밀 명령
+스킬에서 너무 마법 같은 동작을 자동 실행 — 나중에 본인도 헷갈립니다. **명확하게.**
+
+### ❌ 전역에 모든 걸
+프로젝트마다 다른 규칙이 전역 CLAUDE.md에 들어가면 충돌. **분리.**
+
+### ❌ 백업 없는 자동화
+Hooks가 자동으로 git commit / 파일 수정을 하는데 검토 없이 — 위험. 반드시 사람 확인 단계.
+
+## 잘 되고 있는지 점검
+
+### 한 달에 한 번 체크
+- [ ] CLAUDE.md가 최신인가? (지난 변경 반영 안 된 거 있으면 업데이트)
+- [ ] 안 쓰는 스킬은 비활성화
+- [ ] 권한 deny 리스트가 충분히 강력한가
+- [ ] MCP 토큰들 만료 안 됐나
+- [ ] 후크가 정상 작동하나 (`audit.log` 등 확인)
+
+## 본인만의 시스템 만들기
+
+이 가이드의 모든 패턴은 **시작점**입니다. 본인이 자주 하는 작업을 관찰하면서 아래를 반복하세요.
+
+```
+1. 같은 일을 두 번 했네?  → CLAUDE.md에 규칙으로 추가
+2. 같은 일을 세 번 했네?  → Skills로 자동화
+3. 자꾸 위험하게 했네?    → Hooks로 안전장치
+4. 외부 서비스 호출 잦네? → MCP 도입
+```
+
+## 다음 단계
+
+- 👉 [Windows 환경 풀가이드](/extras/windows-setup) — Windows 사용자 핵심 셋업
+- 👉 [트러블슈팅 FAQ](/extras/troubleshooting) — 막혔을 때

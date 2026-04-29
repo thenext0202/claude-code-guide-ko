@@ -1,0 +1,364 @@
+---
+title: 🔧 트러블슈팅 FAQ
+description: 에러 메시지별로 빠르게 찾는 응급실. Ctrl+F 로 키워드 검색하세요.
+---
+
+# 🔧 트러블슈팅 FAQ
+
+> 막혔을 때 페이지. **에러 메시지를 그대로 Ctrl+F** 로 찾아보세요.
+
+## 🚨 자주 나오는 에러 (Top 20)
+
+### `claude: command not found` <a id="claude-not-found"></a>
+
+**원인**: 설치 안 됐거나 PATH에 없음
+
+**해결**:
+```bash
+# 1. 설치 확인
+which claude       # macOS/Linux
+where claude       # Windows
+
+# 2. 다시 설치
+npm install -g @anthropic-ai/claude-code
+
+# 3. 그래도 안 되면 npm prefix 확인
+npm config get prefix
+# 그 경로 + /bin (Linux) 또는 그 경로 자체 (Windows) 가 PATH에 있는지
+```
+
+### `node: command not found` <a id="node-not-found"></a>
+
+**원인**: Node.js 설치 안 됨
+
+**해결**: [nodejs.org](https://nodejs.org)에서 LTS 다운로드 → 설치 시 "Add to PATH" 체크 → 터미널 재시작.
+
+---
+
+### `npm install -g` 시 `EACCES: permission denied` <a id="npm-permission"></a>
+
+**원인**: 글로벌 폴더 권한 부족
+
+**해결 (macOS/Linux)**:
+```bash
+mkdir ~/npm-global
+npm config set prefix ~/npm-global
+echo 'export PATH=~/npm-global/bin:$PATH' >> ~/.zshrc   # bash면 ~/.bashrc
+source ~/.zshrc
+```
+
+**해결 (Windows)**: PowerShell을 **관리자 권한**으로 실행해서 다시 시도.
+
+> ❌ `sudo npm install -g` 는 임시 방편. 권한이 꼬일 수 있어 비추.
+
+---
+
+### 로그인 화면에서 멈춤 <a id="login"></a>
+
+**증상**: `claude` 실행 후 브라우저가 안 열리거나, 열려도 다시 터미널로 안 돌아옴
+
+**해결**:
+1. 화면에 표시된 URL을 **직접 복사** → 브라우저에 붙여넣기
+2. 그래도 안 되면:
+```bash
+claude /logout
+claude
+```
+3. 브라우저 캐시 / 시크릿 모드로 시도
+4. 회사 네트워크라면 프록시 / 방화벽 설정 확인
+
+---
+
+### `Network error / fetch failed`
+
+**원인**: 인터넷 연결 또는 프록시 문제
+
+**해결**:
+```bash
+# 인터넷 확인
+ping anthropic.com
+
+# 프록시 설정 (회사 환경)
+export HTTPS_PROXY=http://proxy.company.com:8080
+export HTTP_PROXY=http://proxy.company.com:8080
+```
+
+---
+
+### `Module not found: ...`
+
+**원인**: 패키지 미설치 또는 import 경로 오타
+
+**해결**:
+```bash
+npm install <패키지명>
+# 또는
+rm -rf node_modules package-lock.json
+npm install
+```
+
+---
+
+### `Cannot find module '@anthropic-ai/claude-code'`
+
+**원인**: 글로벌 vs 로컬 설치 혼동
+
+**해결**:
+```bash
+npm uninstall @anthropic-ai/claude-code         # 로컬 제거
+npm install -g @anthropic-ai/claude-code        # 글로벌 설치
+```
+
+---
+
+### 한글이 ???? 로 깨짐 (Windows)
+
+**해결**: [Windows 풀가이드 → 인코딩](/extras/windows-setup#encoding) 참조
+
+빠른 임시: `chcp 65001` 실행
+
+---
+
+### 권한 묻는 게 매번 떠서 답답
+
+**해결**: 자주 쓰는 명령은 settings.json에 등록
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm run *)",
+      "Read(**)"
+    ]
+  }
+}
+```
+
+또는 `/permissions acceptEdits` 모드로.
+
+---
+
+### `EADDRINUSE: address already in use :::3000`
+
+**원인**: 3000번 포트가 이미 사용 중
+
+**해결 (macOS/Linux)**:
+```bash
+lsof -i :3000
+kill -9 <PID>
+```
+
+**해결 (Windows)**:
+```powershell
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+또는 다른 포트 사용:
+```bash
+PORT=3001 npm run dev
+```
+
+---
+
+### `git push` 시 `rejected (non-fast-forward)`
+
+**원인**: 원격에 내가 모르는 변경이 있음
+
+**해결**:
+```bash
+git pull --rebase
+# conflict 있으면 해결 후
+git push
+```
+
+> ⚠️ `git push --force` 는 동료 작업 날릴 수 있음. 협업 중이면 신중.
+
+---
+
+### `MODULE_NOT_FOUND` (Next.js / React)
+
+**원인**: 프로덕션 빌드와 의존성 mismatch
+
+**해결**:
+```bash
+rm -rf .next node_modules package-lock.json
+npm install
+npm run build
+```
+
+---
+
+### Hot reload 안 됨
+
+**해결**:
+1. 서버 재시작
+2. 브라우저 캐시 지우기 (Ctrl+Shift+R)
+3. `node_modules/.cache` 삭제
+4. WSL이라면 파일이 `/mnt/c/...` 가 아닌 `~/` 아래에 있는지 확인
+
+---
+
+### Python `IndentationError`
+
+**원인**: 들여쓰기 섞임 (탭 vs 스페이스)
+
+**해결**:
+```
+> 이 파일 들여쓰기 통일해줘. 4 스페이스로.
+```
+
+또는 에디터에서 "Convert Indentation to Spaces".
+
+---
+
+### 디스크 용량 부족 (`ENOSPC`)
+
+**해결**:
+```bash
+# Node 캐시 정리
+npm cache clean --force
+
+# Next.js 빌드 캐시
+rm -rf .next
+
+# Docker 캐시 (해당 시)
+docker system prune -a
+```
+
+---
+
+### MCP 서버 연결 실패
+
+**증상**: `/mcp` 에서 `disconnected`
+
+**해결**:
+1. MCP 서버 토큰 / 환경변수 정상인지 확인
+2. `claude --debug` 로 자세한 로그
+3. 해당 MCP 패키지 재설치
+4. Claude 재시작
+
+---
+
+### `git pull` conflict
+
+**해결 패턴**:
+```
+> git pull 했더니 conflict 났어. 어떤 파일에서 났는지 확인하고,
+   각 conflict 별로 어떻게 해결할지 물어봐줘.
+   내가 직접 결정할게.
+```
+
+---
+
+### 한도 도달 (`rate limit / usage limit`)
+
+**해결**:
+1. 잠시 휴식 (한도 리셋 시간 확인)
+2. `/clear` 로 컨텍스트 비우고 가벼운 작업
+3. `/model` 로 작은 모델 전환
+4. 상위 요금제로 업그레이드 고려
+
+---
+
+### `JSON parse error` (settings.json)
+
+**원인**: settings.json 문법 오류
+
+**해결**:
+- VS Code 같은 에디터로 열어서 빨간 줄 확인
+- 마지막 항목 뒤 콤마(`,`) 제거
+- 모든 키/값을 `"` 로 감싸기
+- [JSONLint](https://jsonlint.com) 에 붙여넣어 검증
+
+---
+
+### Claude가 갑자기 멍청해짐
+
+**원인 Top 3**:
+1. 컨텍스트 누적 → `/clear`
+2. 세션 너무 길음 → 새 세션
+3. 모델 자동 강등 → `/model` 확인
+
+자세한 진단: [10 세션 관리](/core/sessions#증상별-진단표)
+
+---
+
+## 🔍 일반 진단 순서
+
+문제가 뭔지 모르겠을 때, 이 순서로 체크:
+
+### 1단계 · 환경 점검
+```bash
+node --version          # v18 이상
+npm --version           # v9 이상
+claude --version
+git --version
+```
+
+### 2단계 · 디버그 모드
+```bash
+claude --debug
+```
+자세한 로그 출력. 어디서 막히는지 단서.
+
+### 3단계 · 재시작
+```bash
+# Claude 종료 후 재시작
+/exit
+claude
+```
+
+대부분의 일시적 문제는 재시작으로 해결.
+
+### 4단계 · 클린 인스톨
+```bash
+npm uninstall -g @anthropic-ai/claude-code
+npm cache clean --force
+npm install -g @anthropic-ai/claude-code
+```
+
+### 5단계 · 공식 도움
+- `/feedback` 으로 Anthropic에 리포트
+- [공식 문서](https://docs.anthropic.com/claude-code)
+- [GitHub Issues](https://github.com/anthropics/claude-code/issues)
+
+---
+
+## 💡 막혔을 때 활용 팁
+
+### Claude에게 진단 부탁
+
+```
+> 다음 에러가 발생하는데 원인 모르겠어.
+
+   [에러 메시지 전체 붙여넣기]
+
+   환경: [OS, Node 버전 등]
+   발생 시점: [무엇 한 후]
+
+   원인 추정 3가지와 각각 검증 방법 알려줘. 고치진 말고 진단만.
+```
+
+### 에러 영문 검색
+
+```
+> 이 에러를 영어로 번역해서 GitHub Issues / StackOverflow에서
+   유사 사례 3개 찾아줘.
+```
+
+### 최소 재현
+
+```
+> 이 문제를 재현하는 가장 작은 코드 (10줄 이하) 만들어줘.
+```
+
+---
+
+## 📚 더 읽을거리
+
+- [04 설치와 첫 실행](/start/install) — 처음부터 다시
+- [🪟 Windows 풀가이드](/extras/windows-setup) — Windows 전용 문제
+- [13 디버깅 요청하기](/practice/debugging) — 디버깅 잘 시키는 법
+- [공식 문서](https://docs.anthropic.com/claude-code) — Anthropic 공식
