@@ -3,7 +3,7 @@
 코딩을 몰라도 따라 할 수 있는 Claude Code 한국어 가이드 사이트입니다.
 Nextra(Next.js 14 기반)로 만들어졌고, Railway에 배포해서 운영합니다.
 
-> 라이브 사이트: _배포 후 도메인 추가_
+> 라이브 사이트 — https://claude-code-guide-ko-production.up.railway.app
 
 ## 시작하기 전에 (중요)
 
