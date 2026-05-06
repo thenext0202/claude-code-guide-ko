@@ -36,5 +36,8 @@ next-env.d.ts
 .vscode/
 *.swp
 
-# claude code local settings
-.claude/
+# Claude Code local settings (personal, not for git)
+.claude/settings.local.json
+.claude/secrets.*
+.claude/projects/
+CLAUDE.local.md

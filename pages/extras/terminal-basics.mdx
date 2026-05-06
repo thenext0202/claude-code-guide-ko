@@ -1,0 +1,419 @@
+---
+title: 터미널 기초 명령어 — 처음 30분
+description: cd, ls, pwd, mkdir 같은 기본 명령어를 처음 듣는 분께. 한 손으로 따라올 수 있게 풀어 썼습니다.
+---
+
+# 터미널 기초 명령어 — 처음 30분
+
+> "Claude Code 가이드를 읽다가 `cd ~/Desktop` 같은 게 갑자기 나올 때 — 이 페이지가 답입니다."
+
+이 페이지는 **터미널을 처음 여는 분이 30분 안에 익숙해지도록** 썼습니다. 어느 OS든 통해요. 차이가 있는 부분은 그때그때 표시.
+
+> 💡 더 위로 가서 보세요: [📖 용어집](/extras/glossary) · [🪟 Windows 환경 풀가이드](/extras/windows-setup) · [04 설치와 첫 실행](/start/install)
+
+## 한 눈에 (치트시트)
+
+| 하고 싶은 일 | Mac / Linux / Git Bash / WSL | Windows PowerShell |
+|---|---|---|
+| 지금 어디 있는지 | `pwd` | `pwd` 또는 `Get-Location` |
+| 이 폴더 안 보기 | `ls` | `ls` 또는 `dir` |
+| 숨김 파일까지 보기 | `ls -a` | `ls -Force` |
+| 폴더 안으로 들어가기 | `cd 폴더이름` | `cd 폴더이름` (동일) |
+| 한 단계 위로 | `cd ..` | `cd ..` |
+| 홈 폴더로 | `cd ~` | `cd ~` |
+| 폴더 만들기 | `mkdir 새폴더` | `mkdir 새폴더` |
+| 빈 파일 만들기 | `touch 파일.txt` | `New-Item 파일.txt` |
+| 파일 내용 보기 | `cat 파일.txt` | `cat 파일.txt` 또는 `Get-Content` |
+| 파일 복사 | `cp 원본 사본` | `cp 원본 사본` 또는 `Copy-Item` |
+| 파일 옮기기 / 이름 바꾸기 | `mv 옛이름 새이름` | `mv 옛이름 새이름` 또는 `Move-Item` |
+| 파일 삭제 | `rm 파일.txt` | `rm 파일.txt` |
+| 폴더 삭제 (위험!) | `rm -rf 폴더` | `Remove-Item -Recurse 폴더` |
+| 화면 청소 | `clear` | `cls` 또는 `clear` |
+
+> 외울 필요 없어요. **이 페이지를 북마크 → 필요할 때 다시 보기**가 정답.
+
+---
+
+## 1. 가장 먼저 — 지금 어디 있는지
+
+터미널을 열면 어느 폴더든 **시작 위치**가 정해져 있어요. 보통은 [홈 폴더](/extras/glossary#홈-폴더--홈-디렉토리)에서 시작.
+
+```bash
+pwd
+```
+
+`pwd` = **P**rint **W**orking **D**irectory ("지금 작업 폴더를 보여줘").
+
+```
+출력 예 (Mac):     /Users/daniel
+출력 예 (Linux):   /home/daniel
+출력 예 (Windows): C:\Users\daniel
+```
+
+**왜 중요?** Claude Code는 **지금 위치한 폴더의 파일만** 봅니다. 어디 있는지 모르면 엉뚱한 폴더에서 일을 시키게 돼요.
+
+---
+
+## 2. 폴더 안 들여다보기 — `ls`
+
+```bash
+ls
+```
+
+**ls** = **l**i**s**t. 현재 폴더 안의 파일/폴더 목록을 보여줘요.
+
+```
+Desktop  Documents  Downloads  Music  Pictures  Videos
+```
+
+### 자주 쓰는 옵션
+
+| 명령 | 설명 |
+|---|---|
+| `ls -l` | **세로 목록** + 크기·날짜 표시 |
+| `ls -a` | 숨김 파일까지 보기 (`.env`, `.claude` 등) |
+| `ls -la` | 둘 합치기 (가장 많이 씀) |
+| `ls 폴더이름` | 다른 폴더 안 들여다보기 (이동 안 하고) |
+
+### Windows PowerShell 노트
+
+`ls` 도 동작하지만 옵션 문자가 좀 달라요:
+```powershell
+ls          # 기본
+ls -Force   # 숨김 파일 포함
+```
+
+---
+
+## 3. 폴더 이동 — `cd`
+
+가장 많이 칠 명령. **`cd` = change directory.**
+
+```bash
+cd Desktop          # Desktop 안으로 들어가기
+cd ..               # 한 단계 위로 (부모 폴더)
+cd ~                # 홈 폴더로 (어디에 있든)
+cd /                # 시스템 최상위 (Mac/Linux/WSL)
+cd -                # 직전 폴더로 (왔던 길로)
+cd                  # 인자 없으면 홈 폴더로 (Mac/Linux)
+```
+
+### 경로 쓰는 두 가지 방식
+
+**상대 경로**: 지금 위치 기준
+```bash
+cd Desktop                    # 지금 폴더 안의 Desktop
+cd ../Documents               # 위로 갔다가 Documents로
+cd ./projects                 # ./ = 지금 폴더 (생략 가능)
+```
+
+**절대 경로**: 시스템 최상위 기준 (`/` 또는 드라이브 문자로 시작)
+```bash
+cd /Users/daniel/Desktop      # Mac/Linux 절대 경로
+cd C:/Users/daniel/Desktop    # Windows (Git Bash/WSL/PowerShell 다 OK)
+```
+
+---
+
+## 4. 경로 읽는 법
+
+용어집에서 본 [경로](/extras/glossary#경로-path)를 좀 더 자세히.
+
+```
+/Users/daniel/Desktop/프로젝트/hello.txt
+└──── 폴더 ────────────────┘ └ 파일┘
+```
+
+### 특수 기호
+
+| 기호 | 의미 |
+|---|---|
+| `/` | 폴더 구분자 (Mac/Linux), 또는 최상위 |
+| `\` | 폴더 구분자 (Windows 전통, PowerShell 등) |
+| `~` | 내 홈 폴더 (`cd ~/Desktop` = `cd /Users/내이름/Desktop`) |
+| `.` | 지금 이 폴더 |
+| `..` | 한 단계 위 폴더 |
+| `*` | 와일드카드 (모든 것에 매칭) |
+
+### 자주 헷갈리는 점
+
+- `cd Desktop` ≠ `cd /Desktop` (앞에 `/` 가 붙으면 시스템 최상위 기준)
+- `cd ~/Desktop` 은 OS 무관 동작 (홈 → Desktop)
+- 한글 폴더는 따옴표로: `cd "프로젝트 폴더"`
+
+---
+
+## 5. 폴더·파일 만들기
+
+### 새 폴더 — `mkdir`
+
+```bash
+mkdir my-claude-test           # 한 폴더
+mkdir -p deep/nested/folder    # 중간 폴더 자동 생성 (Mac/Linux/Git Bash)
+```
+
+PowerShell에서 중첩 폴더:
+```powershell
+New-Item -ItemType Directory -Force -Path deep\nested\folder
+```
+
+### 빈 파일 — `touch` / `New-Item`
+
+```bash
+touch hello.txt                # Mac/Linux/Git Bash/WSL
+```
+
+```powershell
+New-Item hello.txt             # PowerShell
+```
+
+### 파일에 내용 적기 (간단)
+
+```bash
+echo "안녕 클로드" > hello.txt
+```
+
+`>` 는 "이 출력을 파일로 저장" 이라는 뜻. 같은 명령 다시 하면 **덮어씌움**(주의!). 끝에 추가하려면 `>>`.
+
+```bash
+echo "두 번째 줄" >> hello.txt   # 이어서 추가
+```
+
+---
+
+## 6. 파일 보기·복사·이동·삭제
+
+### 내용 보기 — `cat`
+
+```bash
+cat hello.txt
+```
+
+길면 잘려나가는 게 아니라 한 번에 다 출력. 긴 파일은:
+
+```bash
+less hello.txt    # Mac/Linux: 페이지 단위 (q 키로 나가기)
+head hello.txt    # 처음 10줄만
+tail hello.txt    # 마지막 10줄만
+```
+
+PowerShell:
+```powershell
+cat hello.txt          # 동일
+Get-Content hello.txt  # 정식 형태
+```
+
+### 복사 — `cp`
+
+```bash
+cp 원본.txt 사본.txt              # 파일 복사
+cp -r 폴더 사본폴더                # 폴더 통째로 (-r = recursive)
+```
+
+### 이동 / 이름 변경 — `mv`
+
+```bash
+mv 옛이름.txt 새이름.txt            # 이름 바꾸기
+mv 파일.txt ../다른폴더/             # 다른 폴더로 옮기기
+```
+
+같은 명령으로 둘 다 한다는 게 포인트.
+
+### 삭제 — `rm`
+
+```bash
+rm 파일.txt                       # 파일 삭제 (휴지통 아님, 즉시 삭제)
+rm -r 폴더                        # 폴더 삭제 (-r 필수)
+rm -rf 폴더                       # 강제 + 묻지 않고 삭제 (위험!)
+```
+
+> ⚠️ **`rm -rf /`** 는 절대 치지 마세요. 시스템 전체를 지웁니다.
+> Claude Code의 기본 권한 정책에는 `rm -rf` 같은 위험한 명령은 차단되어 있지만, [Hooks](/advanced/hooks)로 한 번 더 막아두는 게 안전합니다.
+
+---
+
+## 7. 와일드카드 (`*`)
+
+여러 파일을 한 번에 다룰 때.
+
+```bash
+ls *.txt              # 확장자가 txt인 파일 전부
+rm *.tmp              # tmp 파일 모두 삭제
+cp *.md backup/       # md 파일 모두 backup 폴더로
+```
+
+| 패턴 | 매칭 |
+|---|---|
+| `*.txt` | 끝이 .txt 인 모든 파일 |
+| `report-*.csv` | report- 으로 시작하고 .csv 로 끝남 |
+| `*` | 모든 파일/폴더 |
+| `**/*.js` | 하위 폴더 포함 모든 .js (셸/도구에 따라 동작) |
+
+---
+
+## 8. 키보드 단축키 (외우면 일상)
+
+| 키 | 동작 |
+|---|---|
+| `Tab` | **자동 완성** (파일/폴더/명령어). 가장 많이 씀 |
+| `↑` / `↓` | 이전 명령 다시 불러오기 |
+| `Ctrl + C` | 지금 돌고 있는 명령 강제 멈춤 |
+| `Ctrl + L` (또는 `clear`) | 화면 청소 |
+| `Ctrl + A` | 줄 맨 앞으로 이동 |
+| `Ctrl + E` | 줄 맨 끝으로 이동 |
+| `Ctrl + U` | 커서 앞 전체 삭제 |
+| `Ctrl + R` | 명령 히스토리 검색 (강력!) |
+| 우클릭 (Windows) | 붙여넣기 |
+| `Cmd + V` (Mac) / `Ctrl + Shift + V` (Linux) | 붙여넣기 |
+
+> 💡 **Tab 완성**: 파일명을 다 치지 말고 앞 글자 몇 개 + `Tab`. 한 번에 완성되거나, 후보 여러 개면 `Tab` 두 번으로 목록.
+
+---
+
+## 9. 출력 활용
+
+### `|` 파이프 — 결과를 다음 명령에 넘기기
+
+```bash
+ls | head -5        # 처음 5개만
+cat hello.txt | grep "안녕"   # 안녕이 들어간 줄만
+```
+
+`|` 는 "왼쪽 명령의 출력을 → 오른쪽 명령의 입력으로" 라는 뜻.
+
+### 파일로 저장 — `>` / `>>`
+
+```bash
+ls > files.txt       # ls 결과를 files.txt 로 (덮어씀)
+ls >> files.txt      # 이어서 추가
+```
+
+### 검색 — `grep`
+
+```bash
+grep "에러" log.txt              # log.txt에서 "에러" 들어간 줄
+grep -r "TODO" .                # 현재 폴더 이하 전체에서 TODO 검색
+```
+
+> Windows PowerShell에는 grep 대신 `Select-String`. 단, Git Bash나 WSL에서는 `grep` 그대로 통합니다.
+
+---
+
+## 10. 자주 만나는 상황
+
+### 상황 — "지금 어디 있는지 모르겠어"
+```bash
+pwd
+ls
+```
+이 두 줄이면 90%의 혼란 해결.
+
+### 상황 — "프로젝트 폴더로 가려는데 길 못 찾겠어"
+
+방법 1 — Tab 완성 활용:
+```bash
+cd ~
+cd De   ↹    ← Tab 누르면 Desktop 자동 완성
+cd Desktop
+cd 프   ↹    ← 한글도 Tab 완성됨
+```
+
+방법 2 — 절대 경로 복붙:
+- macOS Finder: 폴더 우클릭 → option 키 누른 채 → "경로 이름 복사"
+- Windows 탐색기: 주소창 클릭 → 전체 복사
+- 그대로 `cd "복사한경로"` 에 붙여넣기
+
+방법 3 — Git Bash / WSL: 탐색기에서 폴더 우클릭 → "Git Bash Here" / "WSL에서 열기"
+
+### 상황 — "긴 명령어 아까 쳤는데 또 치기 귀찮아"
+- `↑` 키로 이전 명령 호출
+- `Ctrl + R` 후 단어 일부 입력하면 매칭되는 과거 명령 검색
+- 자주 쓰는 명령은 별칭(alias):
+  ```bash
+  echo 'alias proj="cd ~/Desktop/내프로젝트"' >> ~/.bashrc
+  source ~/.bashrc
+  proj    # 이제 한 글자로 이동
+  ```
+
+### 상황 — "권한 거부 (Permission denied)"
+
+Mac/Linux/WSL에서 `Permission denied` 가 나오면:
+```bash
+sudo 명령어
+```
+`sudo` = "관리자로 실행". 비밀번호 한 번 묻고 진행. 단, **함부로 sudo 붙이지 말기** — 의도하지 않은 변경 가능.
+
+→ 자세히는 [트러블슈팅 → 권한](/extras/troubleshooting#npm-permission)
+
+### 상황 — "한글 폴더에 들어가려는데 안 됨"
+
+따옴표로 감싸세요:
+```bash
+cd "내 프로젝트"
+ls "사진 폴더"
+```
+
+가능하면 폴더는 영문으로 만드는 걸 권장.
+
+### 상황 — "터미널 글자가 너무 작아"
+
+| 환경 | 키보드 |
+|---|---|
+| macOS 터미널 / iTerm | `Cmd + +` / `Cmd + -` |
+| Windows Terminal | `Ctrl + +` / `Ctrl + -` |
+| Git Bash | 우클릭 → Options → Text |
+
+---
+
+## 11. 절대 하면 안 되는 것
+
+```bash
+rm -rf /                       # 시스템 전체 삭제 (절대 금지)
+rm -rf ~                       # 내 홈 폴더 통째로 삭제
+:(){ :|:& };:                  # 포크 폭탄 (시스템 마비)
+sudo 모르는명령                  # 출처 모르는 명령에 sudo 금지
+```
+
+Claude Code의 기본 권한이 막아주긴 하지만, **직접 칠 때도 조심**.
+
+---
+
+## 12. 셸 차이 한 눈에
+
+같은 일을 하는 명령을 셸별로:
+
+| 일 | bash / zsh (Mac/Linux) | Git Bash | PowerShell |
+|---|---|---|---|
+| 환경변수 설정 | `export X=값` | `export X=값` | `$env:X = "값"` |
+| 영구 설정 파일 | `~/.bashrc` 또는 `~/.zshrc` | `~/.bashrc` | `$PROFILE` |
+| 파이프 | `\|` | `\|` | `\|` (단, 객체로 흐름) |
+| 명령 연결 (모두 실행) | `;` | `;` | `;` |
+| 명령 연결 (성공해야 다음) | `&&` | `&&` | `;` 또는 `if (...) {...}` (PS 7+ 는 `&&` 지원) |
+
+**같은 동작이라도 셸마다 표기가 다릅니다.** 가이드/튜토리얼이 어떤 셸 기준인지 보세요. 이 가이드는 기본적으로 **bash 호환** (Git Bash / WSL / Mac / Linux)으로 적습니다.
+
+---
+
+## 13. 더 가볍게 가는 팁 (선택)
+
+### Oh My Zsh / Oh My Bash
+프롬프트가 예뻐지고 자동완성이 똑똑해져요. (Mac은 기본 zsh, Oh My Zsh 추천)
+
+### Starship
+크로스플랫폼 프롬프트 꾸미기.
+
+### tldr / cheat
+```bash
+tldr ls          # ls 명령의 짧은 예시 모음
+```
+
+긴 man 페이지 대신 핵심 예시만.
+
+---
+
+## 다음 단계
+
+- 👉 [📖 용어집](/extras/glossary) — 모르는 단어 사전
+- 👉 [🪟 Windows 환경 풀가이드](/extras/windows-setup) — 윈도우 사용자 필수
+- 👉 [✏️ 에디터 셋업](/extras/editor-setup) — 설정 파일 만지기 시작
+- 👉 [04 설치와 첫 실행](/start/install) — Claude Code 깔러 가기

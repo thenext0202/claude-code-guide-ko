@@ -1,15 +1,16 @@
 import React from 'react'
 import { DocsThemeConfig, useConfig } from 'nextra-theme-docs'
+import { useRouter } from 'next/router'
 
 const SITE_TITLE = 'Claude Code 가이드'
 const SITE_DESCRIPTION =
   '코딩을 몰라도 따라 할 수 있는 Claude Code 한국어 입문 가이드. 설치부터 MCP, Hooks, Skills, 서브에이전트까지 한 번에.'
-const SITE_YEAR = 2026
 
 const SiteHead = () => {
   const { frontMatter, title } = useConfig()
+  const { asPath } = useRouter()
   const description = (frontMatter.description as string) || SITE_DESCRIPTION
-  const pageTitle = title && title !== SITE_TITLE ? `${title} – ${SITE_TITLE}` : SITE_TITLE
+  const pageTitle = asPath === '/' ? SITE_TITLE : `${title} – ${SITE_TITLE}`
   return (
     <>
       <title>{pageTitle}</title>
@@ -51,9 +52,9 @@ const config: DocsThemeConfig = {
     </span>
   ),
   project: {
-    link: 'https://github.com/thenext0202/claude-code-guide-ko'
+    link: 'https://github.com/your-username/claude-code-guide-ko'
   },
-  docsRepositoryBase: 'https://github.com/thenext0202/claude-code-guide-ko/blob/main',
+  docsRepositoryBase: 'https://github.com/your-username/claude-code-guide-ko/blob/main',
   chat: {
     link: 'https://discord.com'
   },
@@ -91,19 +92,22 @@ const config: DocsThemeConfig = {
   },
   footer: {
     content: (
-      <span style={{ fontSize: 12, opacity: 0.5, letterSpacing: 1.2, fontWeight: 500 }}>
-        — 정금구 —
-      </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13 }}>
+        <span>© {new Date().getFullYear()} Claude Code 가이드 · 한국어 입문</span>
+        <span style={{ opacity: 0.6 }}>
+          이 사이트는 Anthropic의 공식 Claude Code 문서를 기반으로 한 비공식 한국어 학습 자료입니다.
+        </span>
+      </div>
     )
   },
   banner: {
     key: 'launch-2026',
-    dismissible: false,
     content: (
-      <span style={{ fontWeight: 500 }}>
+      <span>
         Claude Code 한국어 입문 가이드 — 설치부터 자동화까지, 코딩 몰라도 OK
       </span>
-    )
+    ),
+    dismissible: true
   }
 }
 

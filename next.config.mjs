@@ -10,12 +10,5 @@ const withNextra = nextra({
 })
 
 export default withNextra({
-  reactStrictMode: true,
-  webpack: (config, { dev }) => {
-    config.resolve.symlinks = false
-    if (!dev) {
-      config.cache = false
-    }
-    return config
-  }
+  reactStrictMode: true
 })
